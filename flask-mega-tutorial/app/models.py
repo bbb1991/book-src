@@ -1,5 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from hashlib import md5
 
 from datetime import datetime
 from app import db, login
@@ -11,6 +12,8 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+    about_me = db.Column(db.String(140))
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -24,6 +27,12 @@ class User(db.Model, UserMixin):
     @login.user_loader
     def load_user(id):
         return User.query.get(int(id))
+
+    def avatar(self, size):
+        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+        url = "https://avatars.dicebear.com/v1/male/{}/{}.png"
+        return url.format(digest, size)
+
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
