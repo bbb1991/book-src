@@ -1,11 +1,13 @@
-from flask import Flask
-from config import Config
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_login import LoginManager
 import logging
-from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
+from logging.handlers import SMTPHandler, RotatingFileHandler
+
+from flask import Flask
+from flask_login import LoginManager
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+
+from config import Config
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -22,8 +24,10 @@ if not app.debug:
         secure = None
         if app.config['MAIL_USE_TLS']:
             secure = ()
-        mail_handler = SMTPHandler(mailhost=(app.config['MAIL_SERVER'], app.config['MAIL_PORT']), fromaddr='no-reply@{}'.format(
-            app.config['MAIL_SERVER']), to_addrs=app.config['ADMINS'], subject='Microblog failure', credentials=auth, secure=secure)
+        mail_handler = SMTPHandler(mailhost=(app.config['MAIL_SERVER'], app.config['MAIL_PORT']),
+                                   fromaddr='no-reply@{}'.format(
+                                       app.config['MAIL_SERVER']), to_addrs=app.config['ADMINS'],
+                                   subject='Microblog failure', credentials=auth, secure=secure)
         mail_handler.setLevel(logging.ERROR)
         app.logger.addHandler(mail_handler)
 
@@ -38,6 +42,5 @@ if not app.debug:
 
     app.logger.setLevel(logging.INFO)
     app.logger.info('Microblog startup')
-
 
 from app import routes, models, errors
